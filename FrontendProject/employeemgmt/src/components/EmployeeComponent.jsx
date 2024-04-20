@@ -1,5 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {useNavigate} from 'react-router-dom'
+import { createEmployee, getEmployee, updateEmployee } from "../services/EmployeeServices";
+
+import { useParams } from "react-router-dom";
+
 const EmployeeComponent=()=>{
     const [employeeFirstName, setEmployeeFirstName] = useState('');
     const [employeeLastName, setEmployeeLastName] = useState('');
@@ -12,7 +16,10 @@ const EmployeeComponent=()=>{
     const [cityName, setCityName] = useState('');
     const [address, setAddress] = useState('');
 
+    const {id} = useParams();
+
     const navigate = useNavigate();
+
     const handleFirstName=(e)=>{
         setEmployeeFirstName(e.target.value);
     }
@@ -55,12 +62,61 @@ const EmployeeComponent=()=>{
     const navigateHome=()=>{
         navigate('/employees');
     }
+
+    useEffect(() =>{
+        getEmployee(id).then((response) =>{
+            setEmployeeFirstName(response.data.employeeFirstName);
+            setEmployeeLastName(response.data.employeeLastName);
+            setJobName(response.data.jobName);
+            setEmailId(response.data.emailId);
+            setAge(response.data.age);
+            setContactNumber(response.data.contactNumber);
+            setSalary(response.data.salary);
+            setDepartmentName(response.data.departmentName);
+            setCityName(response.data.cityName);
+            setAddress(response.data.address);
+
+        }).catch(error =>{
+            console.error(error)
+        })
+    },[id])
+
+    const saveAndUpdateEmployee =(e)=>{
+        e.preventDefault();
+        const employee = {employeeFirstName, employeeLastName, jobName, emailId, age, contactNumber, salary, departmentName, cityName, address};
+        console.log(employee);
+
+        if(id){
+            updateEmployee(id, employee).then((response) =>{
+                console.log(response.data);
+            })
+        }
+        else{
+            createEmployee(employee).then((response) =>{
+                console.log(response.data);
+            })
+        }
+        
+        navigate('/employees');
+    }
+
+    function showPageHeading(){
+        if(id)
+        {
+            return <h4 className="text-center">Update Employee</h4>
+        }
+        else{
+            return <h4 className="text-center">Create Employee</h4>
+        }
+    }
     return(
         <div>
             <div className="container-fluid">
                 <div className="row justify-content-center">
                     <div className="col-md-6">
-                        <h4 className="text-center">Create Employee</h4>
+                        {
+                            showPageHeading()
+                        }
                             <form>
                                 <div className="form-group">
                                     <label className="form-label">First Name:</label>
@@ -178,7 +234,7 @@ const EmployeeComponent=()=>{
                                     ></input>
                                 </div>
                                 <div className="mb-5 mt-2">
-                                    <button className="bg-primary text-white">Save</button>
+                                    <button className="bg-primary text-white" onClick={saveAndUpdateEmployee}>Save</button>
                                     <button onClick={navigateHome} className="ms-4 bg-primary text-white">Cancel</button>
                                 </div>
                             </form>
