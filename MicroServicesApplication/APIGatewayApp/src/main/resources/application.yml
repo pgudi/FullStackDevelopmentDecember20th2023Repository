@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: APIGatewayApp
+
+server:
+  port: 9094
+
+eureka:
+  instance:
+    hostname:localhost
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+
+cloud:
+  gateway:
+    routes:
+      - id: StudentServiceApp
+        url: lb://StudentServiceApp
+        predicates:
+          - Path= /api/v1/student/**
+      - id: LibraryServiceApp
+        url: lb://LibraryServiceApp
+        predicates:
+          - Path= /api/v1/library/**
+      - id: BookServiceApp
+        url: lb://BookServiceApp
+        predicates:
+          - Path= /api/v1/book/**
